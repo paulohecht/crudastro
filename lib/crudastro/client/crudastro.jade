@@ -58,6 +58,7 @@ template(name="crudastroTable")
           th _id
           each collectionDefinition.table
             th {{this}}
+          th
       tbody
         each documents
           tr
@@ -67,3 +68,8 @@ template(name="crudastroTable")
             each ../collectionDefinition.table
               td
                 | {{fieldValue}}
+            td
+              a.btn.btn-primary.btn-xs(href="/#{../collectionName}/#{_id}")
+                | Edit
+              button.btn.btn-danger.btn-xs.btn-remove(href="#")
+                | Remove

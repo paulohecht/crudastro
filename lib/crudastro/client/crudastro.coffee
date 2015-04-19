@@ -59,6 +59,19 @@ Template.crudastroForm.helpers
 
 
 
+Template.crudastroTable.events
+
+  'click .btn-remove': (event, template) ->
+    params = Template.parentData(0)
+    bootbox.confirm 'Are you sure want to delete this document?', (result) =>
+      if result
+        Meteor.call 'crudDelete', params.collectionName, @_id, (err) ->
+          if err
+            console.log err
+          else
+            console.log "ok"
+    false
+
 Template.crudastroNew.events
 
   'submit form': (event, template) ->

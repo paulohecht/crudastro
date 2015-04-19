@@ -12,3 +12,9 @@ Meteor.methods
       _id: id
     ,
       $set: data
+
+  crudDelete: (collectionName, id) ->
+    collection = crudastro.collections[collectionName]
+    #server side validations...
+    collection.remove
+      _id: id
