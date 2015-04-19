@@ -1,4 +1,5 @@
 crudastro
+
   posts:
     fields: [
       name: 'title'
@@ -12,6 +13,9 @@ crudastro
         required: true
     ]
     table: ['title']
+
+crudastro
+
   tags:
     fields: [
       name: 'title'

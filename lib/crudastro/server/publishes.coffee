@@ -4,6 +4,7 @@ Meteor.startup ->
 
     Meteor.publish collectionName + "Table", ->
       #TODO: Only fields from table definition
+      #TODO: Create pagination
       crudastro.collections[collectionName].find()
 
     Meteor.publish collectionName + "Document", (documentId) ->

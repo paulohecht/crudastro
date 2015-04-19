@@ -11,13 +11,13 @@ Meteor.startup ->
       subscription = Meteor.subscribe collectionName + "Table"
       Tracker.autorun => Session.set "loading", false if subscription.ready()
       @layout 'layout'
-      @render 'table', data:
+      @render 'crudastroTable', data:
         collectionName: collectionName
         collectionDefinition: collectionDefinition
 
     Router.route "/#{collectionName}/new", ->
       @layout 'layout'
-      @render 'new', data:
+      @render 'crudastroNew', data:
         collectionName: collectionName
         collectionDefinition: collectionDefinition
 
@@ -26,12 +26,12 @@ Meteor.startup ->
       subscription = Meteor.subscribe collectionName + "Document", @params.documentId
       Tracker.autorun => Session.set "loading", false if subscription.ready()
       @layout 'layout'
-      @render 'edit', data:
+      @render 'crudastroEdit', data:
         documentId: @params.documentId
         collectionName: collectionName
         collectionDefinition: collectionDefinition
 
-Template.table.helpers
+Template.crudastroTable.helpers
 
   isLoading: ->
     Session.get "loading"
@@ -43,7 +43,7 @@ Template.table.helpers
     document = Template.parentData(1)
     document[@]
 
-Template.form.helpers
+Template.crudastroForm.helpers
 
   isLoading: ->
     Session.get "loading"
@@ -52,14 +52,35 @@ Template.form.helpers
     return {} unless @documentId
     crudastro.collections[@collectionName].findOne(@documentId)
 
+  fieldValue: ->
+    params = Template.parentData(1)
+    document = crudastro.collections[params.collectionName].findOne(params.documentId)
+    document[@name] if document
 
-Template.form.events
+
+
+Template.crudastroNew.events
 
   'submit form': (event, template) ->
     data = {}
     _.forEach @collectionDefinition.fields, (field) ->
       data[field.name] = template.$("form ##{field.name}").val()
     Meteor.call 'crudCreate', @collectionName, data, (err) ->
+      if err
+        console.log err
+      else
+        console.log "ok"
+    false
+
+Template.crudastroEdit.events
+
+  'submit form': (event, template) ->
+    params = Template.parentData(0)
+    id = params.documentId
+    data = {}
+    _.forEach @collectionDefinition.fields, (field) ->
+      data[field.name] = template.$("form ##{field.name}").val()
+    Meteor.call 'crudUpdate', @collectionName, id, data, (err) ->
       if err
         console.log err
       else

@@ -11,34 +11,37 @@ head
 
 body
 
-template(name="loading")
-  .alert.alert-info
-    | loading
-
 template(name="home")
   .well
     | home
 
-template(name="new")
+template(name="crudastroLoading")
+  .well
+    | loading
+
+template(name="crudastroNew")
 
   h1 {{collectionName}} new
-  +form
+  +crudastroForm
 
-template(name="edit")
+template(name="crudastroEdit")
 
   h1 edit {{collectionName}}
-  +form
+  if isLoading
+    +crudastroLoading
+  else
+    +crudastroForm
 
-template(name="form")
+template(name="crudastroForm")
   form
     each collectionDefinition.fields
       .form-group
         label(for='{{name}}') {{name}}
-        input.form-control(id="{{name}}" type='{{type}}', placeholder='{{placeholder}}')
+        input.form-control(id="{{name}}" type='{{type}}', placeholder='{{placeholder}}', value='{{fieldValue}}')
     hr
     input.btn.btn-primary(type="submit")
 
-template(name="table")
+template(name="crudastroTable")
 
   h1 {{collectionName}}
 
@@ -46,18 +49,21 @@ template(name="table")
     i.fa.fa-plus
     | New
 
-  table.table.table-hover.table-zebra
-    thead
-      tr
-        th _id
-        each collectionDefinition.table
-          th {{this}}
-    tbody
-      each documents
+  if isLoading
+    +crudastroLoading
+  else
+    table.table.table-hover.table-zebra
+      thead
         tr
-          td
-            a(href="/#{../collectionName}/#{_id}")
-              | {{_id}}
-          each ../collectionDefinition.table
+          th _id
+          each collectionDefinition.table
+            th {{this}}
+      tbody
+        each documents
+          tr
             td
-              | {{fieldValue}}
+              a(href="/#{../collectionName}/#{_id}")
+                | {{_id}}
+            each ../collectionDefinition.table
+              td
+                | {{fieldValue}}
