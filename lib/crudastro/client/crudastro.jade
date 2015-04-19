@@ -1,0 +1,63 @@
+head
+  title
+    | crudastro
+  link(rel='shortcut icon', href='/ico/favicon.png')
+  meta(charset='utf-8')
+  meta(name='viewport', content='width=device-width, initial-scale=1, maximum-scale=1')
+  meta(http-equiv='X-UA-Compatible', content='IE=edge,chrome=1')
+  meta(http-equiv='Content-Language', content='pt_BR')
+  meta(name='description', content='')
+  meta(name='author', content='')
+
+body
+
+template(name="loading")
+  .alert.alert-info
+    | loading
+
+template(name="home")
+  .well
+    | home
+
+template(name="new")
+
+  h1 {{collectionName}} new
+  +form
+
+template(name="edit")
+
+  h1 edit {{collectionName}}
+  +form
+
+template(name="form")
+  form
+    each collectionDefinition.fields
+      .form-group
+        label(for='{{name}}') {{name}}
+        input.form-control(id="{{name}}" type='{{type}}', placeholder='{{placeholder}}')
+    hr
+    input.btn.btn-primary(type="submit")
+
+template(name="table")
+
+  h1 {{collectionName}}
+
+  a.btn.btn-primary(href="/#{collectionName}/new")
+    i.fa.fa-plus
+    | New
+
+  table.table.table-hover.table-zebra
+    thead
+      tr
+        th _id
+        each collectionDefinition.table
+          th {{this}}
+    tbody
+      each documents
+        tr
+          td
+            a(href="/#{../collectionName}/#{_id}")
+              | {{_id}}
+          each ../collectionDefinition.table
+            td
+              | {{fieldValue}}
