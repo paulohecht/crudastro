@@ -7,57 +7,35 @@ Meteor.startup ->
   _.forEach crudastro.data, (collectionDefinition, collectionName) ->
 
     Router.route "/#{collectionName}", ->
-      Session.set "loading", true
-      subscription = Meteor.subscribe collectionName + "Table"
-      Tracker.autorun => Session.set "loading", false if subscription.ready()
       @layout 'layout'
       @render 'crudastroTable', data:
-        collectionName: collectionName
-        collectionDefinition: collectionDefinition
+        collectionDefinition: _.defaults collectionDefinition, name: collectionName
 
     Router.route "/#{collectionName}/new", ->
       @layout 'layout'
       @render 'crudastroNew', data:
-        collectionName: collectionName
-        collectionDefinition: collectionDefinition
+        collectionDefinition: _.defaults collectionDefinition, name: collectionName
 
     Router.route "/#{collectionName}/:documentId", ->
-      Session.set "loading", true
-      subscription = Meteor.subscribe collectionName + "Document", @params.documentId
-      Tracker.autorun => Session.set "loading", false if subscription.ready()
       @layout 'layout'
       @render 'crudastroEdit', data:
         documentId: @params.documentId
-        collectionName: collectionName
-        collectionDefinition: collectionDefinition
+        collectionDefinition: _.defaults collectionDefinition, name: collectionName
+
+Template.crudastroTable.onCreated ->
+
+  @subscribe @data.collectionDefinition.name + "Table"
 
 Template.crudastroTable.helpers
 
-  isLoading: ->
-    Session.get "loading"
-
   documents: ->
-    crudastro.collections[@collectionName].find().fetch()
+    crudastro.collections[@collectionDefinition.name].find().fetch()
 
-  fieldValue: ->
-    document = Template.parentData(1)
-    document[@]
+Template.crudastroTableCell.helpers
 
-Template.crudastroForm.helpers
-
-  isLoading: ->
-    Session.get "loading"
-
-  document: ->
-    return {} unless @documentId
-    crudastro.collections[@collectionName].findOne(@documentId)
-
-  fieldValue: ->
-    params = Template.parentData(1)
-    document = crudastro.collections[params.collectionName].findOne(params.documentId)
-    document[@name] if document
-
-
+  value: ->
+    console.log @
+    @document[@column]
 
 Template.crudastroTable.events
 
@@ -74,16 +52,25 @@ Template.crudastroTable.events
 
 Template.crudastroNew.events
 
-  'submit form': (event, template) ->
+  'click .btn-save': (event, template) ->
     data = {}
     _.forEach @collectionDefinition.fields, (field) ->
       data[field.name] = template.$("form ##{field.name}").val()
-    Meteor.call 'crudCreate', @collectionName, data, (err) ->
+    Meteor.call 'crudCreate', @collectionDefinition.name, data, (err) ->
       if err
+        $.bootstrapGrowl("there was an error saving the document.", { type: 'error' });
         console.log err
       else
-        console.log "ok"
+        $.bootstrapGrowl("the document has been successfully saved.", { type: 'success' });
     false
+
+Template.crudastroEdit.onCreated ->
+  @subscribe @data.collectionDefinition.name + "Document", @data.documentId
+
+Template.crudastroEdit.helpers
+
+  document: ->
+    crudastro.collections[@collectionDefinition.name].findOne(@documentId)
 
 Template.crudastroEdit.events
 
@@ -99,3 +86,26 @@ Template.crudastroEdit.events
       else
         console.log "ok"
     false
+
+
+Template.crudastroFormInput.helpers
+
+  value: ->
+    return unless @document
+    @document[@field.name]
+
+
+Template.layout.onRendered ->
+
+  bootcards.init
+    offCanvasHideOnMainClick: true
+    offCanvasBackdrop: true
+    enableTabletPortraitMode: true
+    disableRubberBanding: true
+    disableBreakoutSelector: 'a.no-break-out'
+
+    if bootcards.isXS()
+      window.addEventListener "orientationchange", ->
+        window.scrollTo(0,0)
+      , false
+      window.scrollTo(0,0)

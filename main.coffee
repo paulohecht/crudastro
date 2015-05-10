@@ -1,24 +1,27 @@
 crudastro
 
-  posts:
+  companies:
+    icon: 'building-o'
     fields: [
-      name: 'title'
+      name: 'name'
       type: 'text'
       validations:
         required: true
     ,
-      name: 'content'
+      name: 'phon'
       type: 'text'
       validations:
         required: true
     ]
-    table: ['title']
+    table: ['name']
 
-crudastro
-
-  tags:
+  contacts:
+    icon: 'users'
     fields: [
-      name: 'title'
+      name: 'name'
+      type: 'text'
+    ,
+      name: 'phone'
       type: 'text'
     ]
     table: ['title']

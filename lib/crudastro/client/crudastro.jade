@@ -8,68 +8,113 @@ head
   meta(http-equiv='Content-Language', content='pt_BR')
   meta(name='description', content='')
   meta(name='author', content='')
+  
+  link(href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css', rel='stylesheet')
+  link(href='//cdnjs.cloudflare.com/ajax/libs/bootcards/1.1.2/css/bootcards-desktop.min.css', rel='stylesheet')
+  //link(href='//cdnjs.cloudflare.com/ajax/libs/bootcards/1.1.1/css/bootcards-ios.min.css', rel='stylesheet')
+  //link(href='//cdnjs.cloudflare.com/ajax/libs/bootcards/1.1.1/css/bootcards-android.min.css', rel='stylesheet')
+  link(href='//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css', rel='stylesheet')
+
+  script(src='//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js')
+  script(src='//cdnjs.cloudflare.com/ajax/libs/bootcards/1.1.2/js/bootcards.min.js')
+  script(src='//cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.4.0/bootbox.min.js')
+  script(src='//cdnjs.cloudflare.com/ajax/libs/bootstrap-growl/1.0.0/jquery.bootstrap-growl.min.js')
+  script(src='//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.3/fastclick.min.js')
 
 body
 
 template(name="home")
-  .well
-    | home
+  .panel-body
+    p
+      | home
 
 template(name="crudastroLoading")
-  .well
-    | loading
+  .panel-body
+    p
+      | loading...
 
 template(name="crudastroNew")
-
-  h1 {{collectionName}} new
-  +crudastroForm
+  .row
+    .col-sm-6.col-sm-offset-3
+      .panel.panel-default
+        .panel-heading.clearfix
+          h3.panel-title.pull-left
+            | {{collectionDefinition.name}} new
+        +crudastroForm collectionDefinition=collectionDefinition
+        .panel-footer.clearfix
+          input.btn.btn-primary.btn-save.pull-right(type="submit" value="save")
 
 template(name="crudastroEdit")
-
-  h1 edit {{collectionName}}
-  if isLoading
-    +crudastroLoading
-  else
-    +crudastroForm
+  .row
+    .col-sm-6.col-sm-offset-3
+      .panel.panel-default
+        .panel-heading.clearfix
+          h3.panel-title.pull-left
+            | {{collectionDefinition.name}} edit
+        if Template.subscriptionsReady
+          +crudastroForm document=document collectionDefinition=collectionDefinition
+        else
+          +crudastroLoading
+        .panel-footer.clearfix
+          input.btn.btn-primary.btn-save.pull-right(type="submit" value="save")
 
 template(name="crudastroForm")
-  form
-    each collectionDefinition.fields
-      .form-group
-        label(for='{{name}}') {{name}}
-        input.form-control(id="{{name}}" type='{{type}}', placeholder='{{placeholder}}', value='{{fieldValue}}')
-    hr
-    input.btn.btn-primary(type="submit")
+  .modal-body
+    form
+      each collectionDefinition.fields
+        +crudastroFormInput field=this document=../document
+
+template(name="crudastroFormInput")
+  .form-group
+    label.control-label(for='{{field.name}}') {{field.name}}
+    input.form-control(id="{{field.name}}" type='{{field.type}}', placeholder='{{field.placeholder}}', value='{{value}}')
+
 
 template(name="crudastroTable")
+  .panel.panel-default
+    .panel-heading.clearfix
+      h3.panel-title.pull-left
+        | {{collectionDefinition.name}}
+      .btn-group.pull-right
+        a.btn.btn-primary(href="/{{collectionDefinition.name}}/new")
+          i.fa.fa-plus
+          span
+            | new
+    if Template.subscriptionsReady
+      .table-responsive
+        table.table.table-hover.table-zebra
+          thead
+            tr.active
+              th _id
+              each collectionDefinition.table
+                +crudastroTableColumnHeader column=this
+              th
+          tbody
+              each documents
+                +crudastroTableRow document=this collectionDefinition=../collectionDefinition
+    else
+      .panel-body
+        +crudastroLoading
+    .panel-footer
+      small
+        | pagination
 
-  h1 {{collectionName}}
+template(name="crudastroTableColumnHeader")
+  th {{column}}
+  
+template(name="crudastroTableRow")
+  tr
+    td
+      a(href="/{{collectionDefinition.name}}/{{document._id}}")
+        | {{document._id}}
+    each collectionDefinition.table
+      +crudastroTableCell column=this document=../document
+    td
+      a.btn.btn-primary.btn-xs(href="/{{collectionDefinition.name}}/{{document._id}}")
+        | Edit
+      button.btn.btn-danger.btn-xs.btn-remove(href="#")
+        | Remove
 
-  a.btn.btn-primary(href="/#{collectionName}/new")
-    i.fa.fa-plus
-    | New
-
-  if isLoading
-    +crudastroLoading
-  else
-    table.table.table-hover.table-zebra
-      thead
-        tr
-          th _id
-          each collectionDefinition.table
-            th {{this}}
-          th
-      tbody
-        each documents
-          tr
-            td
-              a(href="/#{../collectionName}/#{_id}")
-                | {{_id}}
-            each ../collectionDefinition.table
-              td
-                | {{fieldValue}}
-            td
-              a.btn.btn-primary.btn-xs(href="/#{../collectionName}/#{_id}")
-                | Edit
-              button.btn.btn-danger.btn-xs.btn-remove(href="#")
-                | Remove
+template(name="crudastroTableCell")
+  td
+    | {{value}}

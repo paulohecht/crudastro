@@ -1,2 +1,2 @@
 Template.registerHelper 'crudastroCollections', ->
-	_.keys crudastro.collections
+	_.map crudastro.data, (value, key) -> _.defaults value, name: key
