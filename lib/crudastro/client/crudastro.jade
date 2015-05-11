@@ -15,7 +15,7 @@ head
   //link(href='//cdnjs.cloudflare.com/ajax/libs/bootcards/1.1.1/css/bootcards-android.min.css', rel='stylesheet')
   link(href='//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css', rel='stylesheet')
 
-  script(src='//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js')
+  script(src='//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js')
   script(src='//cdnjs.cloudflare.com/ajax/libs/bootcards/1.1.2/js/bootcards.min.js')
   script(src='//cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.4.0/bootbox.min.js')
   script(src='//cdnjs.cloudflare.com/ajax/libs/bootstrap-growl/1.0.0/jquery.bootstrap-growl.min.js')
@@ -81,26 +81,41 @@ template(name="crudastroTable")
           span
             | new
     if Template.subscriptionsReady
-      .table-responsive
-        table.table.table-hover.table-zebra
-          thead
-            tr.active
-              th _id
-              each collectionDefinition.table
-                +crudastroTableColumnHeader column=this
-              th
-          tbody
-              each documents
-                +crudastroTableRow document=this collectionDefinition=../collectionDefinition
+      if isEmpty
+        .panel-body
+          p
+            | this collection is empty
+        .panel-footer        
+      else
+        .table-responsive
+          table.table.table-hover.table-zebra
+            thead
+              tr.active
+                +crudastroTableColumnHeader column='_id' collectionDefinition=collectionDefinition query=query
+                each collectionDefinition.table
+                  +crudastroTableColumnHeader column=this collectionDefinition=../collectionDefinition query=../query
+                th
+            tbody
+                each documents
+                  +crudastroTableRow document=this collectionDefinition=../collectionDefinition
+        .panel-footer
+          +crudastroTablePagination documents=documents collectionDefinition=collectionDefinition query=query
     else
       .panel-body
         +crudastroLoading
-    .panel-footer
-      small
-        | pagination
+      .panel-footer
 
 template(name="crudastroTableColumnHeader")
-  th {{column}}
+  th 
+    a(href="{{url}}")
+      | {{column}}
+      if isCurrentSort
+        if isDesc
+          i.fa.fa-caret-down
+        else
+          i.fa.fa-caret-up
+      else
+        i.fa.fa-sort
   
 template(name="crudastroTableRow")
   tr
@@ -118,3 +133,45 @@ template(name="crudastroTableRow")
 template(name="crudastroTableCell")
   td
     | {{value}}
+
+template(name="crudastroTablePagination")
+  nav.text-center
+    p 
+      | total de {{count}} documentos
+    ul.pagination
+      if isCurrentPageFirst
+        li.disabled
+          a
+            span(aria-hidden='true') &laquo;
+      else
+        li
+          a(href='{{firstUrl}}')
+            span(aria-hidden='true') &laquo;
+      if hasPreviousElipisis
+        li.disabled
+          a
+            i.fa.fa-ellipsis-h
+      each pages
+        +crudastroTablePaginationPageButton page=this documents=../documents collectionDefinition=../collectionDefinition query=../query
+      if hasNextElipisis
+        li.disabled
+          a
+            i.fa.fa-ellipsis-h
+      if isCurrentPageLast
+        li.disabled
+          a
+            span(aria-hidden='true') &raquo;
+      else
+        li
+          a(href='{{lastUrl}}')
+            span(aria-hidden='true') &raquo;
+
+template(name="crudastroTablePaginationPageButton")
+  if isCurrentPage
+    li.active
+      a(href='{{url page=page}}')
+        span(aria-hidden='true') {{pageCaption}}
+  else
+    li
+      a(href='{{url page=page}}')
+        span(aria-hidden='true') {{pageCaption}}

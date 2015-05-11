@@ -13,7 +13,7 @@ crudastro
       validations:
         required: true
     ]
-    table: ['name']
+    table: ['name', 'phon']
 
   contacts:
     icon: 'users'
@@ -24,4 +24,4 @@ crudastro
       name: 'phone'
       type: 'text'
     ]
-    table: ['title']
+    table: ['name']
